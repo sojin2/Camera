@@ -1,37 +1,34 @@
 //
 //  ViewController.swift
-//  Camera
+//  QRScanCamera
 //
-//  Created by 김소진 on 9/3/24.
+//  Created by 김소진 on 9/5/24.
 //
 
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
-
-    var cameraPreviewView: CameraView!
+class ViewController: UIViewController, ScanViewDelegate {
+    var scanView: ScanView!
     var captureSession: AVCaptureSession!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // CameraPreviewView 설정
-        cameraPreviewView = CameraView(frame: view.bounds)
-        view.addSubview(cameraPreviewView)
+        scanView = ScanView(frame: view.bounds)
+        view.addSubview(scanView)
+        scanView.delegate = self
         
         // 카메라 세션 설정
         setupCameraSession()
-
-        // 촬영 버튼 액션 설정
-        cameraPreviewView.captureButton.addTarget(self, action: #selector(didTapCaptureButton), for: .touchUpInside)
     }
     
     // 카메라 세션 설정
     private func setupCameraSession() {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .photo
-        
+
         // 후면 카메라 설정
         guard let backCamera = AVCaptureDevice.default(for: .video) else {
             print("카메라를 찾을 수 없습니다.")
@@ -45,7 +42,8 @@ class ViewController: UIViewController {
             }
             
             // 미리보기 레이어에 세션 연결
-            cameraPreviewView.setSession(captureSession)
+            scanView.setSession(captureSession)
+            scanView.configureQRCodeDetection(session: captureSession)
             
             captureSession.startRunning()
             
@@ -54,9 +52,15 @@ class ViewController: UIViewController {
         }
     }
     
-    // 촬영 버튼이 눌렸을 때 호출되는 메서드
-    @objc func didTapCaptureButton() {
-        print("촬영 버튼이 눌렸습니다.")
-        // 사진 촬영 로직 구현
+    func didDetectQRCode(_ code: String) {
+        print("QR 코드 인식됨: \(code)")
+        
+        // QR 코드 데이터를 처리하거나 네트워크 요청
+        handleQRCodeData(code)
+    }
+    
+    func handleQRCodeData(_ code: String) {
+        // QR 코드 데이터를 처리 로직
+        print("QR 코드 처리 중: \(code)")
     }
 }
